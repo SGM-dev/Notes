@@ -14,7 +14,7 @@ export default function App() {
   );
 
   React.useEffect(() => {
-    localStorage.setItem("notes".JSON.stringify(notes));
+    localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
   function createNewNote() {
@@ -27,9 +27,9 @@ export default function App() {
   }
 
   function updateNote(text) {
+    // Put the most recently-modified note at the top
     setNotes((oldNotes) => {
       const newArray = [];
-      
       for (let i = 0; i < oldNotes.length; i++) {
         const oldNote = oldNotes[i];
         if (oldNote.id === currentNoteId) {
@@ -40,6 +40,24 @@ export default function App() {
       }
       return newArray;
     });
+  }
+
+  /**
+   * Challenge: complete and implement the deleteNote function
+   *
+   * Hints:
+   * 1. What array method can be used to return a new
+   *    array that has filtered out an item based
+   *    on a condition?
+   * 2. Notice the parameters being based to the function
+   *    and think about how both of those parameters
+   *    can be passed in during the onClick event handler
+   */
+
+  function deleteNote(event, noteId) {
+    event.stopPropagation();
+    // Your code here
+    setNotes((oldNotes) => oldNotes.filter((note) => note.id !== noteId));
   }
 
   function findCurrentNote() {
@@ -59,6 +77,7 @@ export default function App() {
             currentNote={findCurrentNote()}
             setCurrentNoteId={setCurrentNoteId}
             newNote={createNewNote}
+            deleteNote={deleteNote}
           />
           {currentNoteId && notes.length > 0 && (
             <Editor currentNote={findCurrentNote()} updateNote={updateNote} />

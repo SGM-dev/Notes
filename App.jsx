@@ -3,14 +3,12 @@ import Sidebar from "./components/Sidebar";
 import Editor from "./components/Editor";
 import Split from "react-split";
 import { nanoid } from "nanoid";
+import { onSnapshot } from "firebase/firestore";
+import { notesCollection } from "./firebase-config";
 
 export default function App() {
-  const [notes, setNotes] = React.useState(
-    () => JSON.parse(localStorage.getItem("notes")) || []
-  );
-  const [currentNoteId, setCurrentNoteId] = React.useState(
-    (notes[0]?.id) || ""
-  );
+  const [notes, setNotes] = React.useState([]);
+  const [currentNoteId, setCurrentNoteId] = React.useState(notes[0]?.id || "");
 
   const currentNote =
     notes.find((note) => {
@@ -18,8 +16,16 @@ export default function App() {
     }) || notes[0];
 
   React.useEffect(() => {
-    localStorage.setItem("notes", JSON.stringify(notes));
-  }, [notes]);
+    // localStorage.setItem("notes", JSON.stringify(notes));
+    const unsubsribe = onSnapshot(notesCollection, function (snapshot) {
+      const notesArr = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setNotes(notesArr);
+    });
+    return unsubsribe;
+  }, []);
 
   function createNewNote() {
     const newNote = {
